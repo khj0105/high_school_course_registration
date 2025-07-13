@@ -1,5 +1,6 @@
 CREATE DATABASE IF NOT EXISTS `high_school_credit_system_webpage` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
+# high_school_course_registration_project
 USE `high_school_credit_system_webpage`;
 
 -- 학교 승인 대기 테이블
@@ -68,7 +69,7 @@ CREATE TABLE IF NOT EXISTS `user`(
 CREATE TABLE IF NOT EXISTS `teacher_details`(
 	user_id BIGINT PRIMARY KEY,
     subject VARCHAR(10) NOT NULL,
-    teacher_status ENUM('PENDING', 'APPROVED', 'ON_LEAVE', 'RETIRED') DEFAULT 'PENDING',
+    teacher_status ENUM('PENDING', 'APPROVED', 'ENROLLED', 'ON_LEAVE', 'RETIRED') DEFAULT 'PENDING',
     FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE
 );
 
