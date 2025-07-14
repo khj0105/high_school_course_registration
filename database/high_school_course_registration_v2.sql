@@ -73,17 +73,27 @@ CREATE TABLE IF NOT EXISTS `teacher_details`(
     FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE
 );
 
+-- 교실 테이블
+CREATE TABLE IF NOT EXISTS `classroom`(
+	classroom_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    school_id BIGINT NOT NULL,
+    classroom_name VARCHAR(30) NOT NULL,
+    location_info VARCHAR(100),
+    FOREIGN KEY (school_id) REFERENCES school (school_id)
+);
+
 -- USER-학생 테이블
 CREATE TABLE IF NOT EXISTS `student_details`(
 	user_id BIGINT PRIMARY KEY,
 	student_number VARCHAR(30) NOT NULL UNIQUE,
     student_grade BIGINT NOT NULL,
-    student_classroom BIGINT NOT NULL,
+    classroom_id BIGINT NOT NULL,
     student_birth_date DATE NOT NULL,
     student_affiliation ENUM('LIBERAL_ARTS', 'NATURAL_SCIENCES') NOT NULL,
     student_status ENUM('PENDING', 'APPROVED', 'REJECTED', 'ENROLLED', 'GRADUATED') DEFAULT 'PENDING',
     student_admission_year YEAR NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE,
+	FOREIGN KEY (classroom_id) REFERENCES classroom(classroom_id)
 );
 
 -- 과목 테이블: 강의 개설용 정보
@@ -125,8 +135,9 @@ CREATE TABLE IF NOT EXISTS `course_schedule`(
     course_id BIGINT NOT NULL,
     day_of_week ENUM('MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY') NOT NULL,
     period BIGINT NOT NULL,
-    location VARCHAR(30),
-    FOREIGN KEY (course_id) REFERENCES `course`(course_id) ON DELETE CASCADE
+    classroom_id BIGINT,
+    FOREIGN KEY (course_id) REFERENCES course(course_id) ON DELETE CASCADE,
+	FOREIGN KEY (classroom_id) REFERENCES classroom(classroom_id)
 );
 
 -- 수강 신청 및 수강 이력 테이블
@@ -140,7 +151,8 @@ CREATE TABLE IF NOT EXISTS `course_enrollment`(
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (student_id) REFERENCES user(user_id),
-    FOREIGN KEY (course_id) REFERENCES course(course_id)
+    FOREIGN KEY (course_id) REFERENCES course(course_id),
+    UNIQUE KEY  student_course_restrict (student_id, course_id)
 );
 
 -- 공지사항 테이블
