@@ -1,50 +1,42 @@
 package com.example.high_school_course_registration.common;
 
 public class ApiMappingPattern {
-    // === RESTful API === //
-    // 공통: 로그인한 사용자 전체 (학생, 교사, 관리자)
-    public static final String API_COMMON = "/api/v1/common";
+    private static final String API_V2 = "/api/v2";
 
-    // 권한, 인증 없는 경로
-    public static final String API_AUTH_COMMON = "/api/v1/auth/common";
+    // === 공개 API (인증 불필요) ===
+    public static final String PUBLIC = API_V2 + "/public";
+    public static final String PUBLIC_SCHOOL_APPLICATIONS = PUBLIC + "/school-applications"; //학교 가입 신청
+    public static final String PUBLIC_LOGIN = PUBLIC + "/login"; //로그인
 
-    // 인증 관련 (각 권한 별 사용)
-    public static final String API_AUTH_ADMIN = "/api/v1/auth/admin";
-    public static final String API_AUTH_TEACHER = "/api/v1/auth/teacher";
-    public static final String API_AUTH_STUDENT = "/api/v1/auth/student";
+    // === 슈퍼 관리자 API ===
+    public static final String SUPER_ADMIN = API_V2 + "/super-admin";
+    public static final String SUPER_ADMIN_SCHOOL_APPLICATIONS = SUPER_ADMIN + "/school-applications"; //학교 신청 승인/거절
+    public static final String SUPER_ADMIN_SCHOOLS = SUPER_ADMIN + "/schools"; // 전체 학교 목록 조회
 
-    // 관리자 전용
-    public static final String API_ADMIN = "/api/v1/admin";
-    public static final String API_ADMIN_SUBJECT = API_ADMIN + "/subjects";
-    public static final String API_ADMIN_SUBJECT_STATUS = API_ADMIN_SUBJECT + "/{subjectId}/status";
-    public static final String API_ADMIN_LECTURE = API_ADMIN + "lectures";
-    public static final String API_ADMIN_LECTURE_DETAIL = API_ADMIN_LECTURE + "/{lectureId}";
+    // === 학교 관리자 API ===
+    public static final String SCHOOL_ADMIN = API_V2 + "/school-admin";
+    public static final String SCHOOL_ADMIN_TEACHERS = API_V2 + "/teachers"; //교사 계정 승인/관리
+    public static final String SCHOOL_ADMIN_SUBJECTS = API_V2 + "/subjects"; // 과목 개설 승인/관리
+    public static final String SCHOOL_ADMIN_POLICY = API_V2 + "/policy"; //학사 정책 관리
 
-    // 교사 전용
-    public static final String API_TEACHER = "/api/v1/teacher";
+    // === 교사 API ===
+    public static final String TEACHER = API_V2 + "/teacher";
+    public static final String TEACHER_MY_SUBJECTS = TEACHER + "/my-subjects"; //등록 과목 조회/수정
+    public static final String TEACHER_MY_COURSES = TEACHER + "/my-courses"; //담당 강의 조회
 
-    // 학생 전용
-    public static final String API_STUDENT = "/api/v1/student";
+    // === 학생 API ===
+    public static final String STUDENT = API_V2 + "/student";
+    public static final String STUDENT_MY_ENROLLMENTS = STUDENT + "/my-enrollments"; // 수강신청 내역
+    public static final String STUDENT_COURSESE_REGISTER = STUDENT + "/courses/register"; // 수강 신청
 
-    // 과목 관련
-    public static final String SUBJECT_API = "/api/v1/subjects";
+    // === 학교 관리자 + 교사 API ===
+    public static final String MANAGEMENT = API_V2 + "/management";
+    public static final String MANAGEMENT_STUDENTS = MANAGEMENT + "/students"; //학생 정보 조회
+    public static final String MANAGEMENT_COURSES = MANAGEMENT + "/courses"; //전체 강의 조회/관리
+    public static final String MANAGEMENT_COURSE_ENROLLED_STUDENT = MANAGEMENT + "/{courseId}/enrolled-students"; // 강의별 수강생 명단
 
-    // 강의 관련
-    public static final String LECTURE_API = "/api/v1/lectures";
-
-    // 관리자 + 교사 공통 기능
-    public static final String API_MANAGE = "/api/v1/manage";
-    public static final String API_MANAGE_STUDENT = API_MANAGE + "/students";
-    public static final String API_MANAGE_TEACHER = API_MANAGE +  "/teachers";
-    public static final String API_MANAGE_SUBJECT = API_MANAGE +  "/subjects";
-    public static final String API_MANAGE_LECTURE = API_MANAGE +  "/lectures";
-    public static final String API_MANAGE_LECTURE_REGISTRATIONS_STUDENTS = API_MANAGE_LECTURE + "/{lectureId}/registrations-students";
-    public static final String API_MANAGE_LECTURE_ENROLLED_STUDENTS = API_MANAGE_LECTURE + "/{lectureId}/enrolled-students";
-
-    // 교사 + 학생 공통 기능
-    public static final String API_CLASSROOM = "/api/v1/classroom";
-
-    // 로그인 후 (인증된 사용자 API) 일 경우 기능에 맞게 api 작성 (admin, teacher, student 첨부 X)
-    // + 관리자-교사 / 교사-학생 공통 권한 포함
-    // SecurityConfig 에서 권한 부여 (.hasAnyRole, .hasRole)
+    // === 교사 + 학생 API ===
+    public static final String COMMON = API_V2 + "/common";
+    public static final String COMMON_COURSES = COMMON + "/courses"; // 수강신청 가능 전체 강의 목록 조회
+    public static final String COMMON_NOTICES = COMMON + "/notices"; // 공지사항 조회
 }
