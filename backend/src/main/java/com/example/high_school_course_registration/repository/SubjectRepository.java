@@ -1,26 +1,16 @@
 package com.example.high_school_course_registration.repository;
 
+import com.example.high_school_course_registration.common.enums.SubjectStatus;
+import com.example.high_school_course_registration.entity.School;
 import com.example.high_school_course_registration.entity.Subject;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Repository
-public interface SubjectRepository extends JpaRepository<Subject, String> {
-    // manage 권한 (ADMIN, TEACHER)
-    @Query("SELECT s FROM Subject s WHERE " +
-            "(:subjectName IS NULL OR :subjectName = '' OR s.subjectName LIKE %:subjectName%) AND " +
-            "(:grade IS NULL OR :grade = '' OR s.grade = :grade) AND " +
-            "(:semester IS NULL OR :semester = '' OR s.semester = :semester) AND " +
-            "(:affiliation IS NULL OR s.affiliation = :affiliation)")
-    List<Subject> searchSubjects(
-            @Param("subjectName") String subjectName,
-            @Param("grade") String grade,
-            @Param("semester") String semester,
-            @Param("affiliation") SubjectAffiliation affiliation
-    );
+public interface SubjectRepository extends JpaRepository<Subject, Long> {
+    // 특정 학교의 모든 과목 조회
+    List<Subject> findBySchool(School school);
 
+    // 특정 학교의 '상태'별 과목 조회 (예: 승인 대기중인 과목)
+    List<Subject> findBySchoolAndSubjectStatus(School school, SubjectStatus status);
 }
