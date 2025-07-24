@@ -4,13 +4,9 @@ import lombok.Getter;
 
 @Getter
 public enum SubjectAffiliation {
-    LIBERAL_ARTS("문과"),
-    NATURAL_SCIENCES("이과"),
-    COMMON("공통");
-
-    private final String description;
-
-    SubjectAffiliation(String description){
-        this.description = description;
-    }
+    GENERAL,
+    HUMANITIES_SOCIAL_SCIENCES,
+    NATURAL_SCIENCES,
+    ENGINEERING,
+    ARTS_PHYSICAL_EDUCATION
 }
