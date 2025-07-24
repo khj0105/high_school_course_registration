@@ -49,6 +49,15 @@ CREATE TABLE IF NOT EXISTS `school_policy`(
     FOREIGN KEY (school_id) REFERENCES `school`(school_id)
 );
 
+-- 교실 테이블
+CREATE TABLE IF NOT EXISTS `classroom`(
+	classroom_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    school_id BIGINT NOT NULL,
+    classroom_name VARCHAR(30) NOT NULL,
+    location_info VARCHAR(100),
+    FOREIGN KEY (school_id) REFERENCES school (school_id)
+);
+
 -- user 테이블
 CREATE TABLE IF NOT EXISTS `user`(
 	user_id BIGINT PRIMARY KEY auto_increment,
@@ -73,15 +82,6 @@ CREATE TABLE IF NOT EXISTS `teacher_details`(
     FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE
 );
 
--- 교실 테이블
-CREATE TABLE IF NOT EXISTS `classroom`(
-	classroom_id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    school_id BIGINT NOT NULL,
-    classroom_name VARCHAR(30) NOT NULL,
-    location_info VARCHAR(100),
-    FOREIGN KEY (school_id) REFERENCES school (school_id)
-);
-
 -- USER-학생 테이블
 CREATE TABLE IF NOT EXISTS `student_details`(
 	user_id BIGINT PRIMARY KEY,
@@ -89,11 +89,24 @@ CREATE TABLE IF NOT EXISTS `student_details`(
     student_grade BIGINT NOT NULL,
     classroom_id BIGINT NOT NULL,
     student_birth_date DATE NOT NULL,
-    student_affiliation ENUM('LIBERAL_ARTS', 'NATURAL_SCIENCES') NOT NULL,
     student_status ENUM('PENDING', 'APPROVED', 'REJECTED', 'ENROLLED', 'GRADUATED') DEFAULT 'PENDING',
     student_admission_year YEAR NOT NULL,
     FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE,
 	FOREIGN KEY (classroom_id) REFERENCES classroom(classroom_id)
+);
+
+CREATE TABLE IF NOT EXISTS `admin_change_application`(
+	application_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    school_id BIGINT NOT NULL,
+    current_admin_id BIGINT NOT NULL,
+    new_admin_name VARCHAR(30) NOT NULL,
+    new_admin_email VARCHAR(30) NOT NULL,
+    new_admin_phone_number VARCHAR(20) NOT NULL,
+    admin_change_status ENUM('PENDING', 'APPROVED', 'REJECTED') DEFAULT 'PENDING',
+    requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    processed_at TIMESTAMP NULL,
+    FOREIGN KEY (school_id) REFERENCES school(school_id),
+    FOREIGN KEY (current_admin_id) REFERENCES user(user_id)
 );
 
 -- 과목 테이블: 강의 개설용 정보
@@ -103,9 +116,9 @@ CREATE TABLE IF NOT EXISTS `subject`(
     subject_name VARCHAR(50) NOT NULL,
     subject_grade BIGINT NOT NULL,
     subject_semester BIGINT NOT NULL,
-    subject_type ENUM('REQUIRED_SUBJECT','ELECTIVE_COURSES'),
+    subject_type ENUM('REQUIRED_SUBJECT','ELECTIVE_COURSES') NOT NULL,
     subject_credits BIGINT NOT NULL,
-    subject_affiliation ENUM('LIBERAL_ARTS', 'NATURAL_SCIENCES', 'COMMON') NOT NULL,
+    subject_affiliation ENUM('GENERAL','HUMANITIES_SOCIAL_SCIENCES', 'NATURAL_SCIENCES','ENGINEERING','ARTS_PHYSICAL_EDUCATION') NOT NULL,
     subject_status ENUM('APPROVED', 'PENDING', 'REJECTED') DEFAULT 'PENDING',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -121,7 +134,6 @@ CREATE TABLE IF NOT EXISTS `course`(
     year YEAR NOT NULL,
     semester BIGINT NOT NULL,
     course_max_enrollment INT NOT NULL,
-    description TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (subject_id) REFERENCES subject(subject_id),
@@ -140,12 +152,23 @@ CREATE TABLE IF NOT EXISTS `course_schedule`(
 	FOREIGN KEY (classroom_id) REFERENCES classroom(classroom_id)
 );
 
+CREATE TABLE IF NOT EXISTS `syllabus`(
+	syllabus_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    course_id BIGINT NOT NULL UNIQUE,
+    content TEXT NULL,
+    file_path VARCHAR(255) NULL,
+    original_file_name VARCHAR(255) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (course_id) REFERENCES course(course_id) ON DELETE CASCADE
+);
+
 -- 수강 신청 및 수강 이력 테이블
 CREATE TABLE IF NOT EXISTS `course_enrollment`(
 	enrollment_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     student_id BIGINT NOT NULL,
     course_id BIGINT NOT NULL,
-    approval_status ENUM('PENDING', 'APPROVED', 'REJECTED') DEFAULT 'PENDING',
+    enrollment_approval_status ENUM('PENDING', 'APPROVED', 'REJECTED') DEFAULT 'PENDING',
     approval_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     enrollment_status ENUM('ENROLLED', 'COMPLETED', 'WITHDRAWN')  NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
