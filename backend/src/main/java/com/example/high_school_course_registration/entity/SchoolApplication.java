@@ -16,7 +16,7 @@ public class SchoolApplication extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "school_application_id")
-    private Long id;
+    private Long schoolapplicationId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "school_application_status", nullable = false)
@@ -31,7 +31,7 @@ public class SchoolApplication extends BaseTimeEntity {
     @Column(name = "school_email", length = 30, nullable = false)
     private String schoolEmail;
 
-    @Column(name = "School_contact_number", length = 20, nullable = false)
+    @Column(name = "school_contact_number", length = 20, nullable = false)
     private String schoolContactNumber;
 
     @Column(name = "school_admin_name", length = 30, nullable = false)

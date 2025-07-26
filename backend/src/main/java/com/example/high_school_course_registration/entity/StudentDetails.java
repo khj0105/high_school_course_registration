@@ -1,6 +1,5 @@
 package com.example.high_school_course_registration.entity;
 
-import com.example.high_school_course_registration.common.enums.StudentAffiliation;
 import com.example.high_school_course_registration.common.enums.StudentStatus;
 import jakarta.persistence.*;
 import lombok.*;
