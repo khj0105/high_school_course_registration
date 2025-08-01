@@ -7,18 +7,16 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Getter
-@NoArgsConstructor
-public class SubjectUpdateRequestDto {
+public class SubjectCreateRequestDto {
     @NotBlank
     private String subjectName;
 
-    @NotBlank @Min(1) @Max(3)
+    @NotNull @Min(1) @Max(3)
     private Integer grade;
 
-    @NotBlank @Min(1) @Max(2)
+    @NotNull @Min(1) @Max(2)
     private Integer semester;
 
     @NotNull

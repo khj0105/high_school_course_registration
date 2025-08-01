@@ -1,5 +1,6 @@
 package com.example.high_school_course_registration.dto.registration.request;
 
+import com.example.high_school_course_registration.common.enums.EnrollmentApprovalStatus;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,5 +13,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class CourseRegistrationStatusUpdateRequestDto {
     @NotNull(message = "수강신청 상태는 필수입니다.")
-    private CourseRegistrationStatus status;
+    private EnrollmentApprovalStatus status;
 }

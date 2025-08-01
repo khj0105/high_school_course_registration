@@ -1,16 +1,19 @@
 package com.example.high_school_course_registration.dto.student.request;
 
+import com.example.high_school_course_registration.common.enums.SubjectAffiliation;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
+
+import java.time.LocalDate;
 
 @Getter
 public class StudentSignUpRequestDto {
 
     @NotBlank
-    private String studentUsername;
+    private String username;
 
     @NotBlank
-    private String studentPassword;
+    private String password;
 
     @NotBlank
     private String studentNumber;
@@ -28,18 +31,11 @@ public class StudentSignUpRequestDto {
     private String studentPhoneNumber;
 
     @NotNull
-    private String studentBirthDate;
+    private LocalDate studentBirthDate;
 
-    @NotNull
-    private SubjectAffiliation studentAffiliation;
-
-    @Min(2000)
+    @Min(2023)
     private int studentAdmissionYear;
 
-    @Pattern(regexp = "male|female", message = "성별은 male 또는 female이어야 합니다.")
-    private String studentGender;
-
     @NotNull
-    private StudentStatus studentStatus;
-
+    private Long classroomId;
 }
