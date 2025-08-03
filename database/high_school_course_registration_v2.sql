@@ -98,15 +98,14 @@ CREATE TABLE IF NOT EXISTS `student_details`(
 CREATE TABLE IF NOT EXISTS `admin_change_application`(
 	application_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     school_id BIGINT NOT NULL,
-    current_admin_id BIGINT NOT NULL,
-    new_admin_name VARCHAR(30) NOT NULL,
-    new_admin_email VARCHAR(30) NOT NULL,
-    new_admin_phone_number VARCHAR(20) NOT NULL,
-    admin_change_status ENUM('PENDING', 'APPROVED', 'REJECTED') DEFAULT 'PENDING',
-    requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    processed_at TIMESTAMP NULL,
+    requester_id BIGINT NOT NULL,
+    new_admin_id BIGINT NOT NULL,
+    change_status ENUM('PENDING', 'APPROVED', 'REJECTED') DEFAULT 'PENDING',
+	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (school_id) REFERENCES school(school_id),
-    FOREIGN KEY (current_admin_id) REFERENCES user(user_id)
+    FOREIGN KEY (requester_id) REFERENCES user(user_id),
+    FOREIGN KEY (new_admin_id) REFERENCES user(user_id)
 );
 
 -- 과목 테이블: 강의 개설용 정보
@@ -156,6 +155,8 @@ CREATE TABLE IF NOT EXISTS `syllabus`(
 	syllabus_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     course_id BIGINT NOT NULL UNIQUE,
     content TEXT NULL,
+    learning_objectives TEXT NULL,
+    grading_policy TEXT,
     file_path VARCHAR(255) NULL,
     original_file_name VARCHAR(255) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -168,7 +169,7 @@ CREATE TABLE IF NOT EXISTS `course_enrollment`(
 	enrollment_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     student_id BIGINT NOT NULL,
     course_id BIGINT NOT NULL,
-    enrollment_approval_status ENUM('PENDING', 'APPROVED', 'REJECTED') DEFAULT 'PENDING',
+    approval_status ENUM('PENDING', 'APPROVED', 'REJECTED') DEFAULT 'PENDING',
     approval_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     enrollment_status ENUM('ENROLLED', 'COMPLETED', 'WITHDRAWN')  NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
