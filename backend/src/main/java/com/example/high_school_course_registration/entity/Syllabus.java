@@ -22,8 +22,8 @@ public class Syllabus extends BaseTimeEntity {
     private Course course;
 
     @Lob
-    @Column(name = "course_overview")
-    private String courseOverview; // 강의 개요
+    @Column(name = "content")
+    private String content; // 강의 개요
 
     @Lob
     @Column(name = "learning_objectives")

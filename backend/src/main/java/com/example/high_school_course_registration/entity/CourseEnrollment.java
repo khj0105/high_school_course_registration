@@ -18,7 +18,7 @@ public class CourseEnrollment extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "enrollmend_id")
+    @Column(name = "enrollment_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

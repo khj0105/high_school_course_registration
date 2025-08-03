@@ -36,7 +36,7 @@ public class Course extends BaseTimeEntity {
     private Long semester;
 
     @Column(name = "course_max_enrollment", nullable = false)
-    private int courseMaxEnrollment;;
+    private int courseMaxEnrollment;
 
     @Lob
     @Column(name = "description")

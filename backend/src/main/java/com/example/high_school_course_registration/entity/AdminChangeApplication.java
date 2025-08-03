@@ -1,6 +1,6 @@
 package com.example.high_school_course_registration.entity;
 
-import com.example.high_school_course_registration.common.enums.ApplicationStatus;
+import com.example.high_school_course_registration.common.enums.ChangeStatus;
 import com.example.high_school_course_registration.entity.datatime.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -35,6 +35,6 @@ public class AdminChangeApplication extends BaseTimeEntity {
     private String reason; // 변경 사유
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private ApplicationStatus status; // PENDING, APPROVED, REJECTED
+    @Column(name = "change_status", nullable = false)
+    private ChangeStatus changeStatus; // PENDING, APPROVED, REJECTED
 }

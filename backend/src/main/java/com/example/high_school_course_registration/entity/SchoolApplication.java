@@ -16,11 +16,11 @@ public class SchoolApplication extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "school_application_id")
-    private Long schoolapplicationId;
+    private Long id;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "school_application_status", nullable = false)
-    private SchoolApplicationStatus status;
+    private SchoolApplicationStatus schoolApplicationStatus;
 
     @Column(name = "school_name", length = 30, nullable = false)
     private String schoolName;

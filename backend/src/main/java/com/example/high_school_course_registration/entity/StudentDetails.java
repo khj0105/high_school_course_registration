@@ -37,10 +37,6 @@ public class StudentDetails {
     private LocalDate studentBirthDate;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "student_affiliation", nullable = false)
-    private StudentAffiliation studentAffiliation;
-
-    @Enumerated(EnumType.STRING)
     @Column(name = "student_status", nullable = false)
     private StudentStatus studentStatus;
 
