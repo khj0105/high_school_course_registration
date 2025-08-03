@@ -1,5 +1,6 @@
 package com.example.high_school_course_registration.config;
 
+import com.example.high_school_course_registration.common.ApiMappingPattern;
 import com.example.high_school_course_registration.filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -88,21 +89,21 @@ public class WebSecurityConfig {
                 // 각 URL 경로별로 접근 권한을 설정
                 .authorizeHttpRequests(auth -> auth
                         // 전체 권한 (인증 X)
-                        .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers("/api/v1/common/**").hasAnyRole("ADMIN", "TEACHER", "STUDENT")
+                        .requestMatchers(ApiMappingPattern.PUBLIC + "/**").permitAll()
                         // 단독 권한
-                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/v1/teacher/**").hasRole("TEACHER")
-                        .requestMatchers("/api/v1/student/**").hasRole("STUDENT")
+                        .requestMatchers(ApiMappingPattern.SUPER_ADMIN +"/**").hasRole("SUPER_ADMIN")
+                        .requestMatchers(ApiMappingPattern.SCHOOL_ADMIN +"/**").hasRole("SCHOOL_ADMIN")
+                        .requestMatchers(ApiMappingPattern.TEACHER +"/**").hasRole("TEACHER")
+                        .requestMatchers(ApiMappingPattern.STUDENT +"/**").hasRole("STUDENT")
                         // 중복 권한
-                        .requestMatchers("/api/v1/manage/**").hasAnyRole("ADMIN", "TEACHER")
-                        .requestMatchers("/api/v1/classroom/**").hasAnyRole("TEACHER", "STUDENT")
+                        .requestMatchers(ApiMappingPattern.MANAGEMENT +"/**").hasAnyRole("SCHOOL_ADMIN", "TEACHER")
+                        .requestMatchers(ApiMappingPattern.COMMON +"/**").hasAnyRole("TEACHER", "STUDENT")
                         .anyRequest().authenticated()
                 )
                 // Spring Security의 기본 로그인 폼 사용을 비활성화 (API 서버이므로)
                 .formLogin(AbstractHttpConfigurer::disable)
                 // 로그아웃 기능을 설정. "/api/v1/auth/logout"으로 요청 시 로그아웃 처리
-                .logout(logout -> logout.logoutUrl("/api/v1/auth/logout").permitAll())
+                .logout(logout -> logout.logoutUrl(ApiMappingPattern.PUBLIC + "/logout").permitAll())
                 // 가장 중요한 부분: 직접 만든 jwtAuthenticationFilter를 기본 인증 필터(UsernamePasswordAuthenticationFilter)보다 먼저 실행하도록 추가
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

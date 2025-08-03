@@ -23,7 +23,7 @@ public class MailConfig {
     @Value("${spring.mail.username}")
     private String username; // 로그인용 사용자명
 
-    @Value("${spring.mail.password}")
+    @Value(("${spring.mail.password}"))
     private String password; // 로그인용 비밀번호
 
     @Bean
