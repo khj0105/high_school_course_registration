@@ -1,5 +1,6 @@
 package com.example.high_school_course_registration.dto.teacher.request;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 
@@ -12,6 +13,7 @@ public class TeacherCreateRequestDto {
     @NotBlank
     private String name;
     @NotBlank
+    @Email
     private String email;
     @NotBlank
     private String phoneNumber;

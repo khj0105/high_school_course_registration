@@ -12,6 +12,7 @@ import lombok.*;
 @Builder
 public class SubjectDetailDto {
     private Long id;
+    private Long teacherId;
     private Long schoolId;
     private String subjectName;
     private Integer grade;

@@ -12,6 +12,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CourseRegistrationStatusUpdateRequestDto {
-    @NotNull(message = "수강신청 상태는 필수입니다.")
+    @NotNull
     private EnrollmentApprovalStatus status;
 }

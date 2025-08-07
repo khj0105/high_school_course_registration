@@ -25,6 +25,7 @@ public class StudentSignUpRequestDto {
     private int studentGrade;
 
     @Email
+    @NotBlank
     private String studentEmail;
 
     @NotBlank

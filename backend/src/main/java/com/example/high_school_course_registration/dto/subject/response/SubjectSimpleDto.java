@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 public class SubjectSimpleDto {
     private Long id;
     private String subjectName;
+    private String teacherName;
     private Integer grade;
     private Integer semester;
     private SubjectAffiliation subjectAffiliation;

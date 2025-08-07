@@ -15,10 +15,10 @@ public class SubjectUpdateRequestDto {
     @NotBlank
     private String subjectName;
 
-    @NotBlank @Min(1) @Max(3)
+    @NotNull @Min(1) @Max(3)
     private Integer grade;
 
-    @NotBlank @Min(1) @Max(2)
+    @NotNull @Min(1) @Max(2)
     private Integer semester;
 
     @NotNull
