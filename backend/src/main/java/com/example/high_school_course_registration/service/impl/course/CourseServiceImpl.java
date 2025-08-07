@@ -1,11 +1,16 @@
 package com.example.high_school_course_registration.service.impl.course;
 
-import com.example.high_school_course_registration.common.ResponseMessage;
-import com.example.high_school_course_registration.dto.common.ResponseDto;
-import com.example.high_school_course_registration.dto.registration.response.EnrolledStudentDto;
-import com.example.high_school_course_registration.dto.registration.response.CourseEnrollmentSummaryDto;
-import com.example.high_school_course_registration.service.CourseRegistrationService; // 올바른 인터페이스 임포트
-import jakarta.persistence.EntityNotFoundException; // EntityNotFoundException import 추가
+import com.example.high_school_course_registration.common.enums.EnrollmentApprovalStatus;
+import com.example.high_school_course_registration.common.exception.CustomException;
+import com.example.high_school_course_registration.common.exception.ErrorCode;
+import com.example.high_school_course_registration.dto.course.request.CourseCreateRequestDto;
+import com.example.high_school_course_registration.dto.course.request.CourseUpdateRequestDto;
+import com.example.high_school_course_registration.dto.course.response.CourseDetailDto;
+import com.example.high_school_course_registration.dto.course.response.CourseSimpleDto;
+import com.example.high_school_course_registration.dto.schedule.ScheduleDto;
+import com.example.high_school_course_registration.entity.*;
+import com.example.high_school_course_registration.repository.*;
+import com.example.high_school_course_registration.service.CourseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,89 +20,135 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true) // 기본적으로 읽기 전용 트랜잭션
-public class CourseRegistrationServiceImpl implements CourseRegistrationService {
+public class CourseServiceImpl implements CourseService {
 
-    private final CourseRegistrationRepository courseRegistrationRepository;
-    private final SchoolRepository schoolRepository; // isAuthorized 로직 유지를 위해 주입
-    private final TeacherRepository teacherRepository; // isAuthorized 로직 유지를 위해 주입
-    private final LectureRepository lectureRepository; // 강의 존재 여부 확인 및 정보 조회를 위해 주입
+    private final CourseRepository courseRepository;
+    private final UserRepository userRepository;
+    private final SubjectRepository subjectRepository;
+    private final CourseEnrollmentRepository courseEnrollmentRepository;
 
-    // 강의별 수강신청 학생 명단 조회 (관리자/교사)
     @Override
-    public ResponseDto<CourseEnrollmentSummaryDto> getRegisteredStudentsByLectureId(String username, Long lectureId) {
-        boolean isAuthorized = schoolRepository.existsBySchoolCode(username)
-                || teacherRepository.existsByTeacherUsername(username);
-
-        if (!isAuthorized) {
-            throw new RuntimeException(ResponseMessage.NO_AUTHORITY + ": " + username);
+    @Transactional
+    public CourseDetailDto createCourse(CourseCreateRequestDto requestDto, String username) {
+        User user = findUserByUsername(username);
+        School school = user.getSchool();
+        if (school == null) {
+            throw new CustomException(ErrorCode.INVALID_PERMISSION);
         }
 
-        Lecture lecture = lectureRepository.findById(lectureId) // existsById 대신 findById 사용
-                .orElseThrow(() -> new EntityNotFoundException(ResponseMessage.NOT_EXISTS_LECTURE + ": " + lectureId));
+        Subject subject = subjectRepository.findById(requestDto.getSubjectId())
+                .orElseThrow(() -> new CustomException(ErrorCode.SUBJECT_NOT_FOUND));
 
-        int totalRegisteredCount = courseRegistrationRepository.countByLecture_LectureId(lectureId);
+        User teacher = userRepository.findById(requestDto.getTeacherId())
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        List<CourseRegistration> registrations = courseRegistrationRepository.findByLecture_LectureIdWithStudent(lectureId);
-
-        List<CourseRegistrationStudentListDto> registeredStudentsDto = registrations.stream()
-                .map(registration -> {
-                    Student student = registration.getStudent();
-                    return CourseRegistrationStudentListDto.builder()
-                            .studentId(student.getStudentId())
-                            .studentNumber(student.getStudentNumber())
-                            .studentName(student.getStudentName())
-                            .studentGrade(student.getStudentGrade())
-                            .studentClass(student.getStudentClass())
-                            .studentEmail(student.getStudentEmail())
-                            .status(registration.getStatus())
-                            .build();
-                })
-                .collect(Collectors.toList());
-
-        CourseEnrollmentSummaryDto summaryDto = CourseEnrollmentSummaryDto.builder()
-                .lectureId(lecture.getLectureId())
-                .subjectName(lecture.getSubject().getSubjectName())
-                .teacherName(lecture.getTeacher().getTeacherName())
-                .maxEnrollment(lecture.getMaxEnrollment())
-                .currentRegisteredCount(totalRegisteredCount)
-                .registeredStudents(registeredStudentsDto)
+        Course course = Course.builder()
+                .school(school)
+                .subject(subject)
+                .teacher(teacher)
+                .year(requestDto.getYear())
+                .semester(Long.valueOf(requestDto.getSemester()))
+                .courseMaxEnrollment(requestDto.getMaxEnrollment())
                 .build();
 
-        return ResponseDto.setSuccess(ResponseMessage.GET_REGISTERED_STUDENTS_SUCCESS, summaryDto);
+        return convertToDetailDto(courseRepository.save(course));
     }
 
-    // 강의별 수강 확정 학생 명단 조회 (관리자/교사)
     @Override
-    public ResponseDto<List<EnrolledStudentDto>> getEnrolledStudentsByLectureId(String username, Long lectureId) {
-        boolean isAuthorized = schoolRepository.existsBySchoolCode(username)
-                || teacherRepository.existsByTeacherUsername(username);
+    @Transactional(readOnly = true)
+    public List<CourseSimpleDto> getAllCourses(String username) {
+        User user = findUserByUsername(username);
+        return courseRepository.findBySchool(user.getSchool()).stream()
+                .map(this::convertToSimpleDto)
+                .collect(Collectors.toList());
+    }
 
-        if (!isAuthorized) {
-            throw new RuntimeException(ResponseMessage.NO_AUTHORITY + ": " + username);
+    @Override
+    @Transactional(readOnly = true)
+    public CourseDetailDto getCourseById(Long courseId, String username) {
+        User user = findUserByUsername(username);
+        Course course = findCourseById(courseId);
+
+        if (!course.getSchool().equals(user.getSchool())) {
+            throw new CustomException(ErrorCode.INVALID_PERMISSION);
+        }
+        return convertToDetailDto(course);
+    }
+
+    @Override
+    @Transactional
+    public CourseDetailDto updateCourse(Long courseId, CourseUpdateRequestDto requestDto, String username) {
+        User user = findUserByUsername(username);
+        Course course = findCourseById(courseId);
+
+        if (!course.getSchool().equals(user.getSchool())) {
+            throw new CustomException(ErrorCode.INVALID_PERMISSION);
         }
 
-        boolean lectureExists = lectureRepository.existsById(lectureId);
-        if (!lectureExists) {
-            throw new EntityNotFoundException(ResponseMessage.NOT_EXISTS_LECTURE + ": " + lectureId);
+        User teacher = userRepository.findById(requestDto.getTeacherId())
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        course.update(teacher, requestDto.getMaxEnrollment(), requestDto.getDescription());
+        return convertToDetailDto(course);
+    }
+
+    @Override
+    @Transactional
+    public void deleteCourse(Long courseId, String username) {
+        User user = findUserByUsername(username);
+        Course course = findCourseById(courseId);
+
+        if (!course.getSchool().equals(user.getSchool())) {
+            throw new CustomException(ErrorCode.INVALID_PERMISSION);
         }
 
-        List<CourseRegistration> confirmedRegistrations = courseRegistrationRepository.findByLecture_LectureIdAndStatusConfirmedWithStudent(lectureId);
+        courseRepository.delete(course);
+    }
 
-        List<EnrolledStudentDto> responseData = confirmedRegistrations.stream()
-                .map(registration -> {
-                    Student student = registration.getStudent(); // JOIN FETCH로 이미 가져왔으므로 N+1 발생 안함
-                    return EnrolledStudentDto.builder()
-                            .studentId(student.getStudentId())
-                            .studentNumber(student.getStudentNumber())
-                            .studentName(student.getStudentName())
-                            .studentGrade(student.getStudentGrade())
-                            .studentClass(student.getStudentClass())
-                            .studentBirthDate(student.getStudentBirthDate())
-                            .build();
-                })
+    private User findUserByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    private Course findCourseById(Long courseId) {
+        return courseRepository.findById(courseId)
+                .orElseThrow(() -> new CustomException(ErrorCode.COURSE_NOT_FOUND));
+    }
+
+    private CourseDetailDto convertToDetailDto(Course course) {
+        List<ScheduleDto> scheduleDtos = course.getSchedules().stream()
+                .map(schedule -> ScheduleDto.builder()
+                        .courseId(course.getId())
+                        .dayOfWeek(schedule.getDayOfWeek())
+                        .period(schedule.getPeriod().intValue())
+                        .classroomName(schedule.getClassroom() != null ? schedule.getClassroom().getClassroomName() : "미정")
+                        .subjectName(course.getSubject().getSubjectName())
+                        .build())
                 .collect(Collectors.toList());
 
-        return ResponseDto.setSuccess(ResponseMessage.GET_ENROLLED_STUDENTS_SUCCESS, responseData);
+        int currentEnrollment = (int) courseEnrollmentRepository.countByCourseAndApprovalStatus(course, EnrollmentApprovalStatus.APPROVED);
+
+        return CourseDetailDto.builder()
+                .id(course.getId())
+                .subjectName(course.getSubject().getSubjectName())
+                .description(course.getDescription())
+                .teacherName(course.getTeacher().getName())
+                .maxEnrollment(course.getCourseMaxEnrollment())
+                .currentEnrollment(currentEnrollment)
+                .schedules(scheduleDtos)
+                .build();
+    }
+
+    private CourseSimpleDto convertToSimpleDto(Course course) {
+        CourseSchedule firstSchedule = course.getSchedules().stream().findFirst().orElse(null);
+
+        return CourseSimpleDto.builder()
+                .id(course.getId())
+                .subjectName(course.getSubject().getSubjectName())
+                .teacherName(course.getTeacher().getName())
+                .grade(course.getSubject().getSubjectGrade().intValue())
+                .dayOfWeek(firstSchedule != null ? firstSchedule.getDayOfWeek() : null)
+                .period(firstSchedule != null ? firstSchedule.getPeriod().intValue() : 0)
+                .build();
     }
 }

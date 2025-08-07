@@ -1,12 +1,17 @@
 package com.example.high_school_course_registration.service;
 
-import com.example.high_school_course_registration.dto.common.ResponseDto;
-import com.example.high_school_course_registration.dto.registration.response.EnrolledStudentDto;
-import com.example.high_school_course_registration.dto.registration.response.CourseEnrollmentSummaryDto;
+import com.example.high_school_course_registration.dto.course.request.CourseCreateRequestDto;
+import com.example.high_school_course_registration.dto.course.request.CourseUpdateRequestDto;
+import com.example.high_school_course_registration.dto.course.response.CourseDetailDto;
+import com.example.high_school_course_registration.dto.course.response.CourseSimpleDto;
 
 import java.util.List;
 
-public interface CourseRegistrationService {
-    ResponseDto<CourseEnrollmentSummaryDto> getRegisteredStudentsByLectureId(String username, Long lectureId);
-    ResponseDto<List<EnrolledStudentDto>> getEnrolledStudentsByLectureId(String username, Long lectureId);
+public interface CourseService {
+
+    CourseDetailDto createCourse(CourseCreateRequestDto requestDto, String username);
+    List<CourseSimpleDto> getAllCourses(String username);
+    CourseDetailDto getCourseById(Long courseId, String username);
+    CourseDetailDto updateCourse(Long courseId, CourseUpdateRequestDto requestDto, String username);
+    void deleteCourse(Long courseId, String username);
 }

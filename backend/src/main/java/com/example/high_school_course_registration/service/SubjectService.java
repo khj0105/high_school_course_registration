@@ -1,21 +1,23 @@
 package com.example.high_school_course_registration.service;
 
-import com.example.high_school_course_registration.dto.common.ResponseDto;
-import com.example.high_school_course_registration.dto.subject.response.SubjectGetResponseDto;
-import com.example.high_school_course_registration.dto.subject.response.SubjectListGetResponseDto;
+import com.example.high_school_course_registration.common.enums.SubjectStatus;
+import com.example.high_school_course_registration.dto.subject.request.SubjectApprovalRequestDto;
+import com.example.high_school_course_registration.dto.subject.request.SubjectCreateRequestDto;
+import com.example.high_school_course_registration.dto.subject.request.SubjectUpdateRequestDto;
+import com.example.high_school_course_registration.dto.subject.response.SubjectDetailDto;
+import com.example.high_school_course_registration.dto.subject.response.SubjectSimpleDto;
 
 import java.util.List;
 
 public interface SubjectService {
 
-    // 과목 목록 검색 조회 (반환 LIST) - 교사 / 관리자
-    ResponseDto<List<SubjectListGetResponseDto>> searchSubjects(String userId, String subjectName, String grade, String semester, SubjectAffiliation affiliation);
+        SubjectDetailDto createSubject(SubjectCreateRequestDto requestDto, String username);
+        SubjectDetailDto updateMySubject(Long subjectId, SubjectUpdateRequestDto requestDto, String username);
+        List<SubjectSimpleDto> getMySubjects(String username);
+        SubjectDetailDto getMySubjectById(Long subjectId, String username);
 
-    // 과목 상세 조회 (반환 단건) - 교사 / 관리자
-    ResponseDto<SubjectGetResponseDto> getSubjectById(String userId, String subjectId);
 
-    // 과목 상태 변경 (승인/거절/삭제) - 관리자
-    ResponseDto<SubjectGetResponseDto> updateSubjectStatus(String username, String subjectId, SubjectStatus newStatus);
-
-    // 과목 수정 - 교사 (프론트엔드 파트 담당)
+        SubjectDetailDto updateSubjectStatus(Long subjectId, SubjectApprovalRequestDto requestDto, String username);
+        List<SubjectSimpleDto> getAllSubjectsInSchool(String username);
+        SubjectDetailDto getSubjectById(Long subjectId, String username);
 }

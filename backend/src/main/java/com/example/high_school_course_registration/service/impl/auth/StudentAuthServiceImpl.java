@@ -1,42 +1,56 @@
 package com.example.high_school_course_registration.service.impl.auth;
 
+import com.example.high_school_course_registration.common.enums.UserStatus;
+import com.example.high_school_course_registration.common.exception.CustomException;
+import com.example.high_school_course_registration.common.exception.ErrorCode;
+import com.example.high_school_course_registration.dto.auth.request.LoginRequestDto;
+import com.example.high_school_course_registration.dto.auth.response.StudentLoginResponseDto;
 import com.example.high_school_course_registration.dto.common.ResponseDto;
-import com.example.high_school_course_registration.dto.피드백_auth.request.LoginRequestDto;
-import com.example.high_school_course_registration.dto.피드백_auth.response.StudentLoginResponseDto;
-import com.example.high_school_course_registration.entity.Student;
+import com.example.high_school_course_registration.entity.StudentDetails;
+import com.example.high_school_course_registration.entity.User;
 import com.example.high_school_course_registration.provider.JwtProvider;
-import com.example.high_school_course_registration.repository.StudentRepository;
+import com.example.high_school_course_registration.repository.StudentDetailsRepository;
+import com.example.high_school_course_registration.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class StudentAuthServiceImpl {
 
-    private final StudentRepository studentRepository;
+    private final UserRepository userRepository;
+    private final StudentDetailsRepository studentDetailsRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtProvider jwtTokenProvider;
+    private final JwtProvider jwtProvider;
 
-    public ResponseEntity<ResponseDto<StudentLoginResponseDto>> login(LoginRequestDto dto) {
-        Student student = studentRepository.findByStudentUsername(dto.getUsername())
-                .orElseThrow();
+    @Transactional(readOnly = true)
+    public ResponseDto<StudentLoginResponseDto> login(LoginRequestDto requestDto) {
+        User user = userRepository.findByUsername(requestDto.getUsername())
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        if (!passwordEncoder.matches(dto.getPassword(), student.getStudentPassword())) {
-            //
+        if (!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
         }
 
-        String token = jwtTokenProvider.generateJwtToken(student.getStudentId(), "STUDENT");
+        if (user.getUserStatus() != UserStatus.ACTIVE) {
+            throw new CustomException(ErrorCode.INVALID_PERMISSION);
+        }
 
-        StudentLoginResponseDto responseDto = new StudentLoginResponseDto(
-                student.getStudentId(),
-                student.getStudentName(),
-                student.getStudentEmail(),
-                student.getStudentGrade(),
-                token
-        );
+        StudentDetails studentDetails = studentDetailsRepository.findById(user.getId())
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        return ResponseEntity.ok(ResponseDto.setSuccess("학생 로그인 성공", responseDto));
+        String token = jwtProvider.generateJwtToken(user.getUsername(), user.getUserType().name());
+
+        StudentLoginResponseDto responseData = StudentLoginResponseDto.builder()
+                .studentId(user.getId())
+                .studentName(user.getName())
+                .studentEmail(user.getEmail())
+                .studentGrade(studentDetails.getStudentGrade().intValue())
+                .token(token)
+                .build();
+
+        return ResponseDto.setSuccess("학생 로그인 성공", responseData);
     }
 }

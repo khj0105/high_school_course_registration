@@ -1,41 +1,52 @@
 package com.example.high_school_course_registration.service.impl.auth;
 
+import com.example.high_school_course_registration.common.enums.UserType;
+import com.example.high_school_course_registration.common.exception.CustomException;
+import com.example.high_school_course_registration.common.exception.ErrorCode;
 import com.example.high_school_course_registration.dto.auth.request.LoginRequestDto;
+import com.example.high_school_course_registration.dto.auth.response.SchoolLoginResponseDto;
 import com.example.high_school_course_registration.dto.common.ResponseDto;
-import com.example.high_school_course_registration.dto.피드백_auth.response.SchoolLoginResponseDto;
 import com.example.high_school_course_registration.entity.School;
+import com.example.high_school_course_registration.entity.User;
 import com.example.high_school_course_registration.provider.JwtProvider;
 import com.example.high_school_course_registration.repository.SchoolRepository;
+import com.example.high_school_course_registration.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class SchoolAuthServiceImpl {
+
     private final SchoolRepository schoolRepository;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtProvider jwtTokenProvider;
+    private final JwtProvider jwtProvider;
 
-    public ResponseEntity<ResponseDto<SchoolLoginResponseDto>> login(LoginRequestDto dto) {
-        School school = schoolRepository.findBySchoolCode(dto.getUsername())
-                .orElseThrow();
+    @Transactional(readOnly = true)
+    public ResponseDto<SchoolLoginResponseDto> login(LoginRequestDto requestDto) {
+        School school = schoolRepository.findBySchoolCodeAndDeletedAtIsNull(requestDto.getUsername())
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        if (!passwordEncoder.matches(dto.getPassword(), school.getSchoolPassword())) {
-            //
+        User admin = userRepository.findBySchoolAndUserType(school, UserType.SCHOOL_ADMIN).stream().findFirst()
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        if (!passwordEncoder.matches(requestDto.getPassword(), admin.getPassword())) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
         }
 
-        String token = jwtTokenProvider.generateJwtToken(school.getSchoolCode(), "SCHOOL");
+        String token = jwtProvider.generateJwtToken(admin.getUsername(), admin.getUserType().name());
 
-        SchoolLoginResponseDto responseDto = new SchoolLoginResponseDto(
-                school.getSchoolCode(),
-                school.getId(),
-                school.getSchoolName(),
-                school.getSchoolAdminName(),
-                token
-        );
+        SchoolLoginResponseDto responseData = SchoolLoginResponseDto.builder()
+                .schoolId(school.getId())
+                .schoolCode(school.getSchoolCode())
+                .schoolName(school.getSchoolName())
+                .schoolAdminName(admin.getName())
+                .token(token)
+                .build();
 
-        return ResponseEntity.ok(ResponseDto.setSuccess("학교 관리자 로그인 성공", responseDto));
+        return ResponseDto.setSuccess("학교 관리자 로그인 성공", responseData);
     }
 }

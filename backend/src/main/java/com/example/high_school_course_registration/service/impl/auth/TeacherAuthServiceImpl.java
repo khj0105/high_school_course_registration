@@ -1,47 +1,56 @@
 package com.example.high_school_course_registration.service.impl.auth;
 
+import com.example.high_school_course_registration.common.enums.UserStatus;
+import com.example.high_school_course_registration.common.exception.CustomException;
+import com.example.high_school_course_registration.common.exception.ErrorCode;
+import com.example.high_school_course_registration.dto.auth.request.LoginRequestDto;
+import com.example.high_school_course_registration.dto.auth.response.TeacherLoginResponseDto;
 import com.example.high_school_course_registration.dto.common.ResponseDto;
-import com.example.high_school_course_registration.dto.피드백_auth.request.LoginRequestDto;
-import com.example.high_school_course_registration.dto.피드백_auth.response.TeacherLoginResponseDto;
-import com.example.high_school_course_registration.entity.Teacher;
+import com.example.high_school_course_registration.entity.TeacherDetails;
+import com.example.high_school_course_registration.entity.User;
 import com.example.high_school_course_registration.provider.JwtProvider;
-import com.example.high_school_course_registration.repository.TeacherRepository;
+import com.example.high_school_course_registration.repository.TeacherDetailsRepository;
+import com.example.high_school_course_registration.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class TeacherAuthServiceImpl {
 
-    private final TeacherRepository teacherRepository;
+    private final UserRepository userRepository;
+    private final TeacherDetailsRepository teacherDetailsRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtProvider jwtTokenProvider;
+    private final JwtProvider jwtProvider;
 
-    public ResponseEntity<ResponseDto<TeacherLoginResponseDto>> login(LoginRequestDto dto) {
-        boolean is_teacher = teacherRepository.existsByTeacherUsername(dto.getUsername());
+    @Transactional(readOnly = true)
+    public ResponseDto<TeacherLoginResponseDto> login(LoginRequestDto requestDto) {
+        User user = userRepository.findByUsername(requestDto.getUsername())
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        if (!is_teacher) {
-            return ResponseEntity.badRequest().body(ResponseDto.setFailed("아이디가 올바르지 않습니다."));
+        if (!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
         }
 
-        Teacher teacher = teacherRepository.getTeacherList(dto.getUsername()).get();
-
-        if (!passwordEncoder.matches(dto.getPassword(), teacher.getTeacherPassword())) {
-            return ResponseEntity.badRequest().body(ResponseDto.setFailed("비밀번호가 올바르지 않습니다."));
+        if (user.getUserStatus() != UserStatus.ACTIVE) {
+            throw new CustomException(ErrorCode.INVALID_PERMISSION);
         }
 
-        String token = jwtTokenProvider.generateJwtToken(teacher.getTeacherId(), "TEACHER");
+        TeacherDetails teacherDetails = teacherDetailsRepository.findById(user.getId())
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        TeacherLoginResponseDto responseDto = new TeacherLoginResponseDto(
-                teacher.getTeacherId(),
-                teacher.getTeacherName(),
-                teacher.getTeacherEmail(),
-                teacher.getTeacherSubject(),
-                token
-        );
+        String token = jwtProvider.generateJwtToken(user.getUsername(), user.getUserType().name());
 
-        return ResponseEntity.ok(ResponseDto.setSuccess("교사 로그인 성공", responseDto));
+        TeacherLoginResponseDto responseData = TeacherLoginResponseDto.builder()
+                .teacherId(user.getId())
+                .teacherName(user.getName())
+                .teacherEmail(user.getEmail())
+                .teacherSubject(teacherDetails.getSubject())
+                .token(token)
+                .build();
+
+        return ResponseDto.setSuccess("교사 로그인 성공", responseData);
     }
 }
