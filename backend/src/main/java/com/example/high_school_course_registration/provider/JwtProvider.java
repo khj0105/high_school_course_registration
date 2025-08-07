@@ -27,7 +27,6 @@ public class JwtProvider {
         this.jwtEmailExpirationMs = jwtEmailExpirationMs;
     }
 
-    // 로그인용 토큰 생성
     public String generateJwtToken(String username, String role) {
         return Jwts.builder()
                 .claim("username", username)
@@ -38,7 +37,6 @@ public class JwtProvider {
                 .compact();
     }
 
-    // 이메일 인증용 토큰 생성
     public String generateEmailToken(String email) {
         return Jwts.builder()
                 .claim("username", email)
@@ -48,7 +46,6 @@ public class JwtProvider {
                 .compact();
     }
 
-    // Bearer 제거
     public String removeBearer(String bearerToken) {
         if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
             throw new RuntimeException("Invalid JWT token format");
@@ -56,7 +53,6 @@ public class JwtProvider {
         return bearerToken.substring("Bearer ".length());
     }
 
-    // 토큰 유효성 검사
     public boolean isValidToken(String token) {
         try {
             getClaims(token);
@@ -66,7 +62,6 @@ public class JwtProvider {
         }
     }
 
-    // Claims 추출
     public Claims getClaims(String token) {
         JwtParser jwtParser = Jwts.parserBuilder()
                 .setSigningKey(key)
@@ -74,17 +69,14 @@ public class JwtProvider {
         return jwtParser.parseClaimsJws(token).getBody();
     }
 
-    // username(email) 추출
     public String getUsernameFromJwt(String token) {
         return getClaims(token).get("username", String.class);
     }
 
-    // role 추출
     public String getRoleFromJwt(String token) {
         return getClaims(token).get("role", String.class);
     }
 
-    // Request에서 이메일 추출
     public String getEmailFromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
