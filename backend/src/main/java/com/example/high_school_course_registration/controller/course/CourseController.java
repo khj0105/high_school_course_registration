@@ -2,72 +2,63 @@ package com.example.high_school_course_registration.controller.course;
 
 import com.example.high_school_course_registration.common.ApiMappingPattern;
 import com.example.high_school_course_registration.dto.common.ResponseDto;
+import com.example.high_school_course_registration.dto.course.request.CourseCreateRequestDto;
 import com.example.high_school_course_registration.dto.course.request.CourseUpdateRequestDto;
+import com.example.high_school_course_registration.dto.course.response.CourseDetailDto;
 import com.example.high_school_course_registration.dto.course.response.CourseSimpleDto;
-import com.example.high_school_course_registration.service.LectureService;
+import com.example.high_school_course_registration.service.CourseService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping(ApiMappingPattern.API_MANAGE_LECTURE)
+@RequestMapping(ApiMappingPattern.MANAGEMENT_COURSES)
 @RequiredArgsConstructor
-public class CourseManageController {
+public class CourseController {
 
-    private final LectureService lectureService;
+    private final CourseService courseService;
 
-    // 전체 강의 목록 조회
+    @PostMapping
+    public ResponseEntity<ResponseDto<CourseDetailDto>> createCourse(
+            @Valid @RequestBody CourseCreateRequestDto requestDto,
+            @AuthenticationPrincipal String username) {
+        CourseDetailDto createdCourse = courseService.createCourse(requestDto, username);
+        return ResponseEntity.ok(ResponseDto.setSuccess("강의가 성공적으로 생성되었습니다.", createdCourse));
+    }
+
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
-    public ResponseEntity<ResponseDto<List<CourseSimpleDto>>> searchLectures(
-            @AuthenticationPrincipal String username,
-            @RequestParam(required = false) Long lectureId,
-            @RequestParam(required = false) String subjectName,
-            @RequestParam(required = false) String teacherName,
-            @RequestParam(required = false) LectureDayOfWeek dayOfWeek,
-            @RequestParam(defaultValue = "0") int period,
-            @RequestParam(defaultValue = "0") int allowedGrade
-    ) {
-        ResponseDto<List<CourseSimpleDto>> results = lectureService.searchLectures(username, lectureId, subjectName, teacherName, dayOfWeek, period, allowedGrade);
-        return ResponseEntity.ok(results);
+    public ResponseEntity<ResponseDto<List<CourseSimpleDto>>> getAllCourses(
+            @AuthenticationPrincipal String username) {
+        List<CourseSimpleDto> courses = courseService.getAllCourses(username);
+        return ResponseEntity.ok(ResponseDto.setSuccess("강의 목록 조회 성공", courses));
     }
 
-    // 강의 상세 조회
-    @GetMapping("/{lectureId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
-    public ResponseEntity<ResponseDto<LectureDetailDto>> findByStudentId(
-            @AuthenticationPrincipal String username,
-            @PathVariable Long lectureId
-    ) {
-        ResponseDto<LectureDetailDto> result = lectureService.findByStudentId(username, lectureId);
-        return ResponseEntity.ok(result);
+    @GetMapping("/{courseId}")
+    public ResponseEntity<ResponseDto<CourseDetailDto>> getCourseById(
+            @PathVariable Long courseId,
+            @AuthenticationPrincipal String username) {
+        CourseDetailDto course = courseService.getCourseById(courseId, username);
+        return ResponseEntity.ok(ResponseDto.setSuccess("강의 상세 정보 조회 성공", course));
     }
 
-    // 강의 수정
-    @PutMapping("/{lectureId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ResponseDto<CourseSimpleDto>> updateLecture(
-            @AuthenticationPrincipal String username,
-            @PathVariable Long lectureId,
-            @Valid @RequestBody CourseUpdateRequestDto requestDto) {
-
-        ResponseDto<CourseSimpleDto> response = lectureService.updateLecture(username, lectureId, requestDto); // username 전달
-        return ResponseEntity.ok(response);
+    @PutMapping("/{courseId}")
+    public ResponseEntity<ResponseDto<CourseDetailDto>> updateCourse(
+            @PathVariable Long courseId,
+            @Valid @RequestBody CourseUpdateRequestDto requestDto,
+            @AuthenticationPrincipal String username) {
+        CourseDetailDto updatedCourse = courseService.updateCourse(courseId, requestDto, username);
+        return ResponseEntity.ok(ResponseDto.setSuccess("강의 정보가 수정되었습니다.", updatedCourse));
     }
 
-    // 강의 삭제
-    @DeleteMapping("/{lectureId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ResponseDto<?>> deleteLecture(
-            @AuthenticationPrincipal String username,
-            @PathVariable Long lectureId) {
-
-        ResponseDto<?> response = lectureService.deleteLecture(username, lectureId); // username 전달
-        return ResponseEntity.ok(response);
+    @DeleteMapping("/{courseId}")
+    public ResponseEntity<ResponseDto<Void>> deleteCourse(
+            @PathVariable Long courseId,
+            @AuthenticationPrincipal String username) {
+        courseService.deleteCourse(courseId, username);
+        return ResponseEntity.ok(ResponseDto.setSuccess("강의가 삭제되었습니다.", null));
     }
 }

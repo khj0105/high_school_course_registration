@@ -1,46 +1,35 @@
 package com.example.high_school_course_registration.controller.student;
 
-import com.example.high_school_course_registration.dto.auth.request.LoginRequestDto;
-import com.example.high_school_course_registration.dto.student.request.StudentSignUpRequestDto;
+import com.example.high_school_course_registration.common.ApiMappingPattern;
+import com.example.high_school_course_registration.dto.common.ResponseDto;
 import com.example.high_school_course_registration.dto.student.request.StudentUpdateRequestDto;
-import com.example.high_school_course_registration.dto.student.response.StudentInfoResponseDto;
-import com.example.high_school_course_registration.entity.Student;
-import com.example.high_school_course_registration.service.impl.StudentService;
+import com.example.high_school_course_registration.dto.student.response.StudentDetailDto;
+import com.example.high_school_course_registration.service.StudentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/students")
+@RequestMapping(ApiMappingPattern.STUDENT) // /api/v2/student
 @RequiredArgsConstructor
 public class StudentController {
 
     private final StudentService studentService;
 
-    @PostMapping("/signup")
-    public ResponseEntity<String> signUp(@Valid @RequestBody StudentSignUpRequestDto request) {
-        studentService.signUp(request);
-        return ResponseEntity.ok("학생 회원가입이 완료되었습니다.");
+    @GetMapping("/my-profile")
+    public ResponseEntity<ResponseDto<StudentDetailDto>> getMyProfile(
+            @AuthenticationPrincipal String username) {
+        StudentDetailDto responseDto = studentService.getStudentProfile(username);
+        return ResponseEntity.ok(ResponseDto.setSuccess("내 정보 조회 성공", responseDto));
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<String> login(@Valid @RequestBody LoginRequestDto request) {
-        Student student = studentService.login(request);
-        return ResponseEntity.ok("로그인 성공: " + student.getStudentName());
-    }
-
-    @GetMapping("/{studentId}")
-    public ResponseEntity<StudentInfoResponseDto> getStudentInfo(@PathVariable String studentId) {
-        StudentInfoResponseDto info = studentService.getStudentInfo(studentId);
-        return ResponseEntity.ok(info);
-    }
-
-    @PutMapping("/{studentId}")
-    public ResponseEntity<String> updateStudentInfo(
-            @PathVariable String studentId,
-            @Valid @RequestBody StudentUpdateRequestDto request) {
-        studentService.updateStudentInfo(studentId, request);
-        return ResponseEntity.ok("학생 정보가 수정되었습니다.");
+    @PutMapping("/my-profile")
+    public ResponseEntity<ResponseDto<StudentDetailDto>> updateMyProfile(
+            @AuthenticationPrincipal String username,
+            @Valid @RequestBody StudentUpdateRequestDto requestDto) {
+        StudentDetailDto responseDto = studentService.updateStudentProfile(username, requestDto);
+        return ResponseEntity.ok(ResponseDto.setSuccess("내 정보가 수정되었습니다.", responseDto));
     }
 }

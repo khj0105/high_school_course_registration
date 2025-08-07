@@ -1,59 +1,26 @@
 package com.example.high_school_course_registration.controller.registration;
 
-import com.example.high_school_course_registration.dto.registration.request.CourseRegistrationRequestDto;
-import com.example.high_school_course_registration.dto.registration.response.CourseRegistrationResponseDto;
-import com.example.high_school_course_registration.provider.JwtProvider;
-import com.example.high_school_course_registration.service.impl.LectureService;
-import jakarta.servlet.http.HttpServletRequest;
+import com.example.high_school_course_registration.common.ApiMappingPattern;
+import com.example.high_school_course_registration.dto.common.ResponseDto;
+import com.example.high_school_course_registration.dto.registration.response.CourseEnrollmentSummaryDto;
+import com.example.high_school_course_registration.service.CourseRegistrationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
-@RequestMapping("/api/v1/course-registrations")
+@RequestMapping(ApiMappingPattern.MANAGEMENT_COURSES)
 @RequiredArgsConstructor
 public class CourseRegistrationController {
 
-    private final LectureService.CourseRegistrationService courseRegistrationService;
-    private final JwtProvider jwtTokenProvider;
+    private final CourseRegistrationService courseRegistrationService;
 
-    // 수강신청 등록
-    @PostMapping
-    public ResponseEntity<String> registerCourse(@RequestBody CourseRegistrationRequestDto requestDto,
-                                                 HttpServletRequest request) {
-        String email = jwtTokenProvider.getEmailFromRequest(request);
-        courseRegistrationService.registerByEmail(email, requestDto);
-        return ResponseEntity.ok("수강신청이 완료되었습니다.");
+    @GetMapping("/{courseId}/enrolled-students")
+    public ResponseEntity<ResponseDto<CourseEnrollmentSummaryDto>> getEnrolledStudents(
+            @PathVariable Long courseId,
+            @AuthenticationPrincipal String username) {
+        CourseEnrollmentSummaryDto summary = courseRegistrationService.getEnrolledStudents(courseId, username);
+        return ResponseEntity.ok(ResponseDto.setSuccess("수강생 목록 조회 성공", summary));
     }
-
-    // 내 수강신청 목록 조회
-    @GetMapping("/my")
-    public ResponseEntity<List<CourseRegistrationResponseDto>> getMyRegistrations(HttpServletRequest request) {
-        String email = jwtTokenProvider.getEmailFromRequest(request);
-        List<CourseRegistrationResponseDto> registrations = courseRegistrationService.getMyRegistrations(email);
-        return ResponseEntity.ok(registrations);
-    }
-
-    // 수강신청 목록 상세 조회
-    @GetMapping("/{registrationId}")
-    public ResponseEntity<CourseRegistrationResponseDto> getRegistrationDetail(
-            @PathVariable Long registrationId,
-            HttpServletRequest request) {
-
-        String email = jwtTokenProvider.getEmailFromRequest(request);
-        CourseRegistrationResponseDto detail = courseRegistrationService.getRegistrationDetail(email, registrationId);
-        return ResponseEntity.ok(detail);
-    }
-
-    // 수강신청 취소
-    @PostMapping("/{registrationId}/cancellation")
-    public ResponseEntity<String> cancelRegistration(@PathVariable Long registrationId,
-                                                     HttpServletRequest request) {
-        String email = jwtTokenProvider.getEmailFromRequest(request);
-        courseRegistrationService.cancelRegistration(email, registrationId);
-        return ResponseEntity.ok("수강신청이 취소되었습니다.");
-    }
-
 }

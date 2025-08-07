@@ -1,11 +1,12 @@
 package com.example.high_school_course_registration.controller.schedule;
 
-import com.example.high_school_course_registration.dto.schedule.response.ScheduleResponseDto;
-import com.example.high_school_course_registration.provider.JwtProvider;
-import com.example.high_school_course_registration.service.impl.ScheduleService;
-import jakarta.servlet.http.HttpServletRequest;
+import com.example.high_school_course_registration.common.ApiMappingPattern;
+import com.example.high_school_course_registration.dto.common.ResponseDto;
+import com.example.high_school_course_registration.dto.schedule.ScheduleDto;
+import com.example.high_school_course_registration.service.ScheduleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,17 +14,17 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/schedules")
+@RequestMapping(ApiMappingPattern.COMMON_SCHEDULE) // /api/v2/common/schedule
 @RequiredArgsConstructor
 public class ScheduleController {
 
     private final ScheduleService scheduleService;
-    private final JwtProvider jwtTokenProvider;
 
-    @GetMapping
-    public ResponseEntity<List<ScheduleResponseDto>> getMySchedule(HttpServletRequest request) {
-        String email = jwtTokenProvider.getEmailFromRequest(request);
-        List<ScheduleResponseDto> schedule = scheduleService.getSchedule(email);
-        return ResponseEntity.ok(schedule);
+    @GetMapping("/my")
+    public ResponseEntity<ResponseDto<List<ScheduleDto>>> getMySchedule(
+            @AuthenticationPrincipal String username) {
+
+        List<ScheduleDto> schedule = scheduleService.getMySchedule(username);
+        return ResponseEntity.ok(ResponseDto.setSuccess("나의 시간표 조회 성공", schedule));
     }
 }
