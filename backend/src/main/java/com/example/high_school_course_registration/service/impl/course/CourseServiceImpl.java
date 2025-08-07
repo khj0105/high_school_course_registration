@@ -1,17 +1,9 @@
-package com.example.high_school_course_registration.service.impl.courseRegist;
+package com.example.high_school_course_registration.service.impl.course;
 
 import com.example.high_school_course_registration.common.ResponseMessage;
 import com.example.high_school_course_registration.dto.common.ResponseDto;
-import com.example.high_school_course_registration.dto.registration.response.CourseRegistrationStudentListDto;
-import com.example.high_school_course_registration.dto.registration.response.EnrolledStudentListDto;
-import com.example.high_school_course_registration.dto.registration.response.LectureRegistrationSummaryDto;
-import com.example.high_school_course_registration.entity.CourseRegistration;
-import com.example.high_school_course_registration.entity.Lecture; // Lecture 엔티티 import 추가
-import com.example.high_school_course_registration.entity.Student; // Student 엔티티 import 추가
-import com.example.high_school_course_registration.repository.CourseRegistrationRepository;
-import com.example.high_school_course_registration.repository.LectureRepository; // LectureRepository 주입받음
-import com.example.high_school_course_registration.repository.SchoolRepository;
-import com.example.high_school_course_registration.repository.TeacherRepository;
+import com.example.high_school_course_registration.dto.registration.response.EnrolledStudentDto;
+import com.example.high_school_course_registration.dto.registration.response.CourseEnrollmentSummaryDto;
 import com.example.high_school_course_registration.service.CourseRegistrationService; // 올바른 인터페이스 임포트
 import jakarta.persistence.EntityNotFoundException; // EntityNotFoundException import 추가
 import lombok.RequiredArgsConstructor;
@@ -33,7 +25,7 @@ public class CourseRegistrationServiceImpl implements CourseRegistrationService 
 
     // 강의별 수강신청 학생 명단 조회 (관리자/교사)
     @Override
-    public ResponseDto<LectureRegistrationSummaryDto> getRegisteredStudentsByLectureId(String username, Long lectureId) {
+    public ResponseDto<CourseEnrollmentSummaryDto> getRegisteredStudentsByLectureId(String username, Long lectureId) {
         boolean isAuthorized = schoolRepository.existsBySchoolCode(username)
                 || teacherRepository.existsByTeacherUsername(username);
 
@@ -63,7 +55,7 @@ public class CourseRegistrationServiceImpl implements CourseRegistrationService 
                 })
                 .collect(Collectors.toList());
 
-        LectureRegistrationSummaryDto summaryDto = LectureRegistrationSummaryDto.builder()
+        CourseEnrollmentSummaryDto summaryDto = CourseEnrollmentSummaryDto.builder()
                 .lectureId(lecture.getLectureId())
                 .subjectName(lecture.getSubject().getSubjectName())
                 .teacherName(lecture.getTeacher().getTeacherName())
@@ -77,7 +69,7 @@ public class CourseRegistrationServiceImpl implements CourseRegistrationService 
 
     // 강의별 수강 확정 학생 명단 조회 (관리자/교사)
     @Override
-    public ResponseDto<List<EnrolledStudentListDto>> getEnrolledStudentsByLectureId(String username, Long lectureId) {
+    public ResponseDto<List<EnrolledStudentDto>> getEnrolledStudentsByLectureId(String username, Long lectureId) {
         boolean isAuthorized = schoolRepository.existsBySchoolCode(username)
                 || teacherRepository.existsByTeacherUsername(username);
 
@@ -92,10 +84,10 @@ public class CourseRegistrationServiceImpl implements CourseRegistrationService 
 
         List<CourseRegistration> confirmedRegistrations = courseRegistrationRepository.findByLecture_LectureIdAndStatusConfirmedWithStudent(lectureId);
 
-        List<EnrolledStudentListDto> responseData = confirmedRegistrations.stream()
+        List<EnrolledStudentDto> responseData = confirmedRegistrations.stream()
                 .map(registration -> {
                     Student student = registration.getStudent(); // JOIN FETCH로 이미 가져왔으므로 N+1 발생 안함
-                    return EnrolledStudentListDto.builder()
+                    return EnrolledStudentDto.builder()
                             .studentId(student.getStudentId())
                             .studentNumber(student.getStudentNumber())
                             .studentName(student.getStudentName())

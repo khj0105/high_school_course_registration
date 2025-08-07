@@ -2,10 +2,7 @@ package com.example.high_school_course_registration.service.impl.teacher;
 
 import com.example.high_school_course_registration.common.ResponseMessage;
 import com.example.high_school_course_registration.dto.common.ResponseDto;
-import com.example.high_school_course_registration.dto.teacher.TeacherListGetResponseDto;
-import com.example.high_school_course_registration.entity.Teacher;
-import com.example.high_school_course_registration.repository.SchoolRepository;
-import com.example.high_school_course_registration.repository.TeacherRepository;
+import com.example.high_school_course_registration.dto.teacher.response.TeacherSimpleDto;
 import com.example.high_school_course_registration.service.TeacherService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,7 +17,7 @@ public class TeacherManageServiceImpl implements TeacherService {
     private final SchoolRepository schoolRepository;
 
     @Override
-    public ResponseDto<List<TeacherListGetResponseDto>> getTeacherList(String username) {
+    public ResponseDto<List<TeacherSimpleDto>> getTeacherList(String username) {
 
         boolean isAuthorized = schoolRepository.existsBySchoolCode(username)
                 || teacherRepository.existsByTeacherUsername(username);
@@ -31,8 +28,8 @@ public class TeacherManageServiceImpl implements TeacherService {
 
         List<Teacher> teachers = teacherRepository.findAll();
 
-        List<TeacherListGetResponseDto> responseData = teachers.stream()
-                .map(teacher -> TeacherListGetResponseDto.builder()
+        List<TeacherSimpleDto> responseData = teachers.stream()
+                .map(teacher -> TeacherSimpleDto.builder()
                         .teacherUsername(teacher.getTeacherUsername())
                         .teacherName(teacher.getTeacherName())
                         .teacherEmail(teacher.getTeacherEmail())

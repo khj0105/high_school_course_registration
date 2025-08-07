@@ -1,7 +1,7 @@
 package com.example.high_school_course_registration.common;
 
 public class ResponseMessage {
-    // === 공통(Common) ==
+    // === 공통(Common) ===
     public static final String SUCCESS = "Success";
     public static final String NO_AUTHORITY = "요청에 대한 권한이 없습니다.";
     public static final String INTERNAL_SERVER_ERROR = "서버 내부에서 오류가 발생했습니다.";

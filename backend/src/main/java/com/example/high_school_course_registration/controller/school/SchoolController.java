@@ -1,8 +1,8 @@
-package com.example.high_school_course_registration.controller.common;
+package com.example.high_school_course_registration.controller;
 
 import com.example.high_school_course_registration.common.ApiMappingPattern;
 import com.example.high_school_course_registration.dto.common.ResponseDto;
-import com.example.high_school_course_registration.dto.common.SchoolListDto;
+import com.example.high_school_course_registration.dto.school.response.SchoolSimpleDto;
 import com.example.high_school_course_registration.service.SchoolService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,8 +23,8 @@ public class SchoolController {
     // 모든 학교 목록 조회
     @GetMapping("/schools")
     @PreAuthorize("hasAnyRole('STUDENT', 'TEACHER', 'ADMIN')")
-    public ResponseEntity<ResponseDto<List<SchoolListDto>>> getAllSchools() {
-        ResponseDto<List<SchoolListDto>> response = schoolService.getAllSchools();
+    public ResponseEntity<ResponseDto<List<SchoolSimpleDto>>> getAllSchools() {
+        ResponseDto<List<SchoolSimpleDto>> response = schoolService.getAllSchools();
         return ResponseEntity.ok(response);
     }
 }

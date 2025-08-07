@@ -1,4 +1,4 @@
-package com.example.high_school_course_registration.controller.lecture;
+package com.example.high_school_course_registration.controller.course;
 
 import com.example.high_school_course_registration.common.ApiMappingPattern;
 import com.example.high_school_course_registration.dto.common.ResponseDto;
@@ -17,7 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping(ApiMappingPattern.API_MANAGE_LECTURE)
 @RequiredArgsConstructor
-public class LectureManageController {
+public class CourseManageController {
 
     private final LectureService lectureService;
 

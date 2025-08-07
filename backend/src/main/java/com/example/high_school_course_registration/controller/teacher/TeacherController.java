@@ -2,7 +2,7 @@ package com.example.high_school_course_registration.controller.teacher;
 
 import com.example.high_school_course_registration.common.ApiMappingPattern;
 import com.example.high_school_course_registration.dto.common.ResponseDto;
-import com.example.high_school_course_registration.dto.teacher.TeacherListGetResponseDto;
+import com.example.high_school_course_registration.dto.teacher.response.TeacherSimpleDto;
 import com.example.high_school_course_registration.service.TeacherService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,10 +23,10 @@ public class TeacherManageController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
-    public ResponseEntity<ResponseDto<List<TeacherListGetResponseDto>>> getTeacherList(
+    public ResponseEntity<ResponseDto<List<TeacherSimpleDto>>> getTeacherList(
             @AuthenticationPrincipal String username
     ) {
-        ResponseDto<List<TeacherListGetResponseDto>> response = teacherService.getTeacherList(username);
+        ResponseDto<List<TeacherSimpleDto>> response = teacherService.getTeacherList(username);
         return ResponseEntity.ok(response);
     }
 }
