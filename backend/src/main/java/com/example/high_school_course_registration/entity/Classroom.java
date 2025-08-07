@@ -1,5 +1,6 @@
 package com.example.high_school_course_registration.entity;
 
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -25,4 +26,9 @@ public class Classroom {
 
     @Column(name = "location_info", length = 100)
     private String locationInfo;
+
+    public void updateClassroomInfo(String classroomName, String locationInfo) {
+        this.classroomName = classroomName;
+        this.locationInfo = locationInfo;
+    }
 }

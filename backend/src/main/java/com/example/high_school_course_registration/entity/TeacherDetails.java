@@ -27,4 +27,8 @@ public class TeacherDetails {
     @Enumerated(EnumType.STRING)
     @Column(name = "teacher_status", nullable = false)
     private TeacherStatus teacherStatus;
+
+    public void updateTeacherStatus(TeacherStatus status) {
+        this.teacherStatus = status;
+    }
 }

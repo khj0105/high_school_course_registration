@@ -26,4 +26,13 @@ public class SchoolPolicy extends BaseTimeEntity {
 
     @Column(name = "graduation_credits", nullable = false)
     private Long graduationCredits;
+
+    public SchoolPolicy(School school) {
+        this.school = school;
+    }
+
+    public void update(Integer maxCreditsSemester, Integer graduationCredits) {
+        this.maxCreditsSemester = Long.valueOf(maxCreditsSemester);
+        this.graduationCredits = Long.valueOf(graduationCredits);
+    }
 }

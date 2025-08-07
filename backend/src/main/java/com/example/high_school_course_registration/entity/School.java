@@ -41,4 +41,9 @@ public class School extends BaseTimeEntity {
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
+
+    public void setRegistrationPeriod(LocalDate startDate, LocalDate endDate) {
+        this.applicationStartedDay = startDate;
+        this.applicationLimitedDay = endDate;
+    }
 }

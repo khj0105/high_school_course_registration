@@ -42,4 +42,8 @@ public class StudentDetails {
 
     @Column(name = "student_admission_year", nullable = false)
     private int studentAdmissionYear;
+
+    public void updateStudentStatus(StudentStatus status) {
+        this.studentStatus = status;
+    }
 }

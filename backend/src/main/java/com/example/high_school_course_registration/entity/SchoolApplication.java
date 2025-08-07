@@ -39,4 +39,8 @@ public class SchoolApplication extends BaseTimeEntity {
 
     @Column(name = "school_admin_phone_number", length = 20, nullable = false)
     private String schoolAdminPhoneNumber;
+
+    public void updateStatus(SchoolApplicationStatus status) {
+        this.schoolApplicationStatus = status;
+    }
 }

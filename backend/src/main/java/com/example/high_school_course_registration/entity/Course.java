@@ -4,6 +4,9 @@ import com.example.high_school_course_registration.entity.datatime.BaseTimeEntit
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "course")
 @Getter
@@ -29,7 +32,7 @@ public class Course extends BaseTimeEntity {
     @JoinColumn(name = "teacher_id", nullable = false)
     private User teacher;
 
-    @Column(name = "year", nullable = false)
+    @Column(name = "course_year", nullable = false)
     private int year;
 
     @Column(name = "semester", nullable = false)
@@ -41,4 +44,13 @@ public class Course extends BaseTimeEntity {
     @Lob
     @Column(name = "description")
     private String description;
+
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CourseSchedule> schedules = new ArrayList<>();
+
+    public void update(User teacher, int maxEnrollment, String description) {
+        this.teacher = teacher;
+        this.courseMaxEnrollment = maxEnrollment;
+        this.description = description;
+    }
 }

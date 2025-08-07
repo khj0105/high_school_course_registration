@@ -44,4 +44,12 @@ public class Notice extends BaseTimeEntity {
 
     @Column(name = "notice_end_date", nullable = false)
     private LocalDate noticeEndDate;
+
+    public void update(String title, String content, NoticeTargetAudience targetAudience, LocalDate startDate, LocalDate endDate) {
+        this.noticeTitle = title;
+        this.noticeContent = content;
+        this.noticeTargetAudience = targetAudience;
+        this.noticeStartDate = startDate;
+        this.noticeEndDate = endDate;
+    }
 }

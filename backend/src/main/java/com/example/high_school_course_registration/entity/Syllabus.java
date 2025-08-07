@@ -23,13 +23,23 @@ public class Syllabus extends BaseTimeEntity {
 
     @Lob
     @Column(name = "content")
-    private String content; // 강의 개요
+    private String content;
 
     @Lob
     @Column(name = "learning_objectives")
-    private String learningObjectives; // 학습 목표
+    private String learningObjectives;
 
     @Lob
     @Column(name = "grading_policy")
-    private String gradingPolicy; // 평가 기준
+    private String gradingPolicy;
+
+    public Syllabus(Course course) {
+        this.course = course;
+    }
+
+    public void update(String content, String objectives, String policy) {
+        this.content = content;
+        this.learningObjectives = objectives;
+        this.gradingPolicy = policy;
+    }
 }

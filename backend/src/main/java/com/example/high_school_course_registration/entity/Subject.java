@@ -24,6 +24,10 @@ public class Subject extends BaseTimeEntity {
     @JoinColumn(name = "school_id", nullable = false)
     private School school;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "teacher_id", nullable = false)
+    private User teacher;
+
     @Column(name = "subject_name", length = 50, nullable = false)
     private String subjectName;
 
@@ -47,4 +51,17 @@ public class Subject extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "subject_status", nullable = false)
     private SubjectStatus subjectStatus;
+
+    public void updateDetails(String subjectName, Integer grade, Integer semester, SubjectType subjectType, Integer credits, SubjectAffiliation subjectAffiliation) {
+        this.subjectName = subjectName;
+        this.subjectGrade = Long.valueOf(grade);
+        this.subjectSemester = Long.valueOf(semester);
+        this.subjectType = subjectType;
+        this.subjectCredits = Long.valueOf(credits);
+        this.subjectAffiliation = subjectAffiliation;
+    }
+
+    public void updateStatus(SubjectStatus status) {
+        this.subjectStatus = status;
+    }
 }
