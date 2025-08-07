@@ -30,7 +30,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             , HttpServletResponse response
             , FilterChain filterChain
     ) throws ServletException, IOException {
-//        try {
             String authorizationHeader = request.getHeader("Authorization");
 
             String token = (authorizationHeader != null && authorizationHeader.startsWith("Bearer "))
@@ -46,9 +45,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String role = jwtProvider.getRoleFromJwt(token);
 
             setAuthenticationContext(request, username, role);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
         filterChain.doFilter(request, response);
     }
 
