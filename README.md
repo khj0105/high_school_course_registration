@@ -70,33 +70,30 @@ GitHub: 코드 저장소, 협업, 이슈 트래킹, 프로젝트 관리에 활�
 
 Project Structure (프로젝트 구조)
   project/
-  ├── .gitignore
-  │
-  ├── build.gradle
-  │
-  ├── settings.gradle
-  │
-  ├── src/
-  │   ├── main/
-  │   │   ├── java/
-  │   │   │   └── com.example.high_school_course_registration/
-  │   │   │          ├── common/
-  │   │   │          ├── config/
-  │   │   │          ├── controller/
-  │   │   │          ├── dto/
-  │   │   │          ├── entity/
-  │   │   │          ├── filter/
-  │   │   │          ├── provider/
-  │   │   │          ├── repository/ 
-  │   │   │          ├── service/
-  │   │   │          └── HighSchoolCourseRegistrationApplication
-  │   │   └── resources/
-  │   │       ├── static/
-  │   │       ├── templates/
-  │   │       ├── application.properties
-  │   │       └── application-secret.properties
-  │   └── test/
-  │       └── java/
-  │           └── com.__back
-  │                   └── HighSchoolCourseRegistrationApplicationTests
-  └── README.md
+├── .gitignore
+├── build.gradle
+├── settings.gradle
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── com.example.high_school_course_registration/
+│   │   │          ├── common/
+│   │   │          ├── config/
+│   │   │          ├── controller/
+│   │   │          ├── dto/
+│   │   │          ├── entity/
+│   │   │          ├── filter/
+│   │   │          ├── provider/
+│   │   │          ├── repository/ 
+│   │   │          ├── service/
+│   │   │          └── HighSchoolCourseRegistrationApplication
+│   │   └── resources/
+│   │       ├── static/
+│   │       ├── templates/
+│   │       ├── application.properties
+│   │       └── application-secret.properties
+│   └── test/
+│       └── java/
+│           └── com.__back
+│                   └── HighSchoolCourseRegistrationApplicationTests
+└── README.md
